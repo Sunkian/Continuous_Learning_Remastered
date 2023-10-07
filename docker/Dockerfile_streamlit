@@ -1,0 +1,79 @@
+#FROM python:3.9-slim
+#MAINTAINER Alice Pagnoux (alice.pagnoux@gmail.com)
+#
+#
+#WORKDIR /app
+#COPY requirements.txt .
+#
+#
+#RUN apt-get update && apt-get install -y \
+#    build-essential \
+#    curl \
+#    software-properties-common \
+#    git \
+#    && rm -rf /var/lib/apt/lists/*
+#RUN apt-get -y install python3
+#RUN apt-get -y install python3-pip
+#
+#
+#
+##RUN git clone https://github.com/streamlit/streamlit-example.git .
+#
+#RUN pip3 install -r requirements.txt
+#
+#COPY webapp-streamlit-upgrade/ .
+#
+#CMD ["streamlit", "run", "main.py"]
+#
+#
+#
+##
+##RUN mkdir -p /usr/src/app
+##WORKDIR /usr/src/app
+##
+##
+##
+##
+##EXPOSE 8501
+##
+##
+##ENTRYPOINT ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+##
+##CMD
+
+
+
+# Dockerfile_streamlit
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libjpeg62-turbo-dev \
+    zlib1g-dev \
+    libfreetype6-dev \
+    liblcms2-dev \
+    libopenjp2-7-dev \
+    libtiff5-dev \
+    tk-dev \
+    tcl-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libgl1-mesa-glx
+
+# Copy requirements file
+COPY ../requirements.txt .
+
+RUN pip3 install --upgrade pip
+# Install required packages
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Copy your Streamlit script into the container
+COPY .. .
+
+# Expose port for Streamlit
+EXPOSE 8501
+
+# Command to run on container start
+CMD ["streamlit", "run", "main.py"]

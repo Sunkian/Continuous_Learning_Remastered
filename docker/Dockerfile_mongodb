@@ -1,0 +1,21 @@
+#FROM mongo:4.4
+#
+#COPY /Users/apagnoux/Downloads/mongodb-macos-aarch64-7.0.0/bin/mongod /usr/bin/mongod
+#RUN mkdir -p /data/db
+#
+#EXPOSE 5003
+#EXPOSE 27017
+#
+#CMD ["/usr/bin/mongod", "--dbpath", "/data/db"]
+
+# Dockerfile_mongodb
+FROM mongo:latest
+
+# Set default port for MongoDB
+EXPOSE 5003
+
+# Set MongoDB's default data directory
+VOLUME [ "/data/db" ]
+
+# Default command to run on container start
+CMD ["mongod", "--bind_ip_all", "--port", "5003"]

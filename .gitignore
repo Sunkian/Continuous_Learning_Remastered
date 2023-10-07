@@ -1,0 +1,5 @@
+/venv
+/model_jingwei/datasets
+/model_jingwei/checkpoints
+.idea/
+/model_jingwei/ylib

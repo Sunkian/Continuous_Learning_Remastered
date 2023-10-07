@@ -1,0 +1,14 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY .. .
+
+RUN pip install flask pymongo
+COPY ../API/api_calls.py /API/api_calls.py
+COPY ../API/api_helper.py /API/api_helper.py
+
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+
+CMD ["python", "/API/api_calls.py"]
