@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore')
 
 np.random.seed(1)
 
-
+from API.api_helper import push_results_to_db
 class Exp_OWL(Exp_OWLbasic):
     def __init__(self, args):
         super(Exp_OWL, self).__init__(args)  ## init device
@@ -146,6 +146,7 @@ class Exp_OWL(Exp_OWLbasic):
         if not os.path.exists(cache_name):
             ood_feat_log = np.zeros((len(out_loader.dataset), sum(featdims)))
             ood_score_log = np.zeros((len(out_loader.dataset), self.num_classes))
+
 
             self.model.eval()
             for batch_idx, (inputs, _) in enumerate(out_loader):

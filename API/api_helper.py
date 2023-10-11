@@ -136,6 +136,11 @@ def retrieve_data(file_name):
     data = pickle.loads(response.content)
     return data
 
+def list_npz_files():
+    response = requests.get("http://flask_api:5003/api/list_npz_files")
+    npz_files = response.json().get("npz_files", [])  # Extracts the list or returns an empty list if not found
+    return npz_files
+
 ## Visua
 # def fetch_npz_names():
 #     # Implement the function to fetch available .npz file names from your database/API
