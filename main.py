@@ -31,8 +31,8 @@ elif val == 2:
     # main()
     test()
 elif val == 3:
-    visualization()
-    # visuuu()
+    # visualization()
+    visuuu()
 else:
     # review()
     # results()

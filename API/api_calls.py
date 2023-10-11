@@ -5,9 +5,9 @@ from bson.binary import Binary
 import pickle
 import numpy as np
 from io import BytesIO
-from flask import Response
+from flask import Response, send_file
 import json
-
+import io
 
 app = Flask(__name__)
 
@@ -47,7 +47,6 @@ def upload_image():
         "class": predicted_class,
         "score": confidence_score,
         "embeddings": []
-
     }
     collection.insert_one(image_document)
 
@@ -172,6 +171,25 @@ def upload_large_npz():
     return jsonify({"message": "Data from large .npz file uploaded in chunks to MongoDB!"})
 
 
+@app.route("/api/list_npz_files", methods=["GET"])
+def list_npz_files():
+    files = collection2.distinct("name")
+    return jsonify({"npz_files": files})
+
+
+@app.route("/api/retrieve_data/<file_name>", methods=["GET"])
+def retrieve_data_api(file_name):
+    chunks = list(collection2.find({"name": file_name}).sort("chunk_number"))
+    if not chunks:
+        return "No data found for the given file name", 404
+    total_chunks = chunks[0]["total_chunks"]
+    if len(chunks) != total_chunks:
+        raise ValueError("Some chunks are missing")
+    serialized_data = b"".join(chunk["data"] for chunk in chunks)
+    return Response(serialized_data, content_type="application/octet-stream")
+
+
+
 # @app.route('/api/get_npz_names', methods=['GET'])
 # def get_npz_names():
 #     file_names = collection2    .distinct("name")
@@ -194,7 +212,90 @@ def upload_large_npz():
 #         data = pickle.loads(serialized_data)
 #         return data
 
+@app.route("/api/update_image_embeddings", methods=["POST"])
+def update_image_embeddings():
+    data = request.json
+    image_name = data["name"]
+    dataset_name = data["dataset_name"]
+    embeddings = data["embeddings"]
 
+    # Find the image in the database and update its embeddings
+    query = {"name": image_name, "dataset": dataset_name}
+    update_values = {
+        "$set": {
+            "embeddings": embeddings
+        }
+    }
+    collection.update_one(query, update_values)
+
+    return jsonify({"message": "Image embeddings updated in MongoDB!"})
+
+# @app.route("/api/get_npz_files", methods=["GET"])
+# def get_npz_files():
+#     # Retrieve all distinct .npz filenames from the database
+#     file_names = collection2.distinct("name")
+#     return jsonify(file_names)
+#
+#
+# def get_npz_data():
+#     file_name = request.args.get('file_name')
+#     chunks = list(collection2.find({"name": file_name}).sort("chunk_number"))
+#
+#     if not chunks:
+#         return jsonify({"error": f"No data found for file {file_name}"}), 404
+#
+#     total_chunks = chunks[0]["total_chunks"]
+#     if len(chunks) != total_chunks:
+#         return jsonify({"error": "Some chunks are missing"}), 400
+#
+#     serialized_data = b"".join(chunk["data"] for chunk in chunks)
+#     data = pickle.loads(serialized_data)
+#
+#     # It's better to convert the data to JSON if possible or specify the content type.
+#     return Response(pickle.dumps(data), content_type="application/octet-stream"), 200
+#
+# @app.route("/api/download_large_npz", methods=["GET"])
+# def download_large_npz():
+#     file_name = request.args.get('file_name')
+#
+#     # Fetch the chunks for the given file name from MongoDB
+#     chunks = list(collection2.find({"name": file_name}).sort("chunk_number"))
+#     total_chunks = chunks[0]["total_chunks"]
+#
+#     # Check if all chunks are present
+#     if len(chunks) != total_chunks:
+#         return jsonify({"error": "Some chunks are missing"}), 400
+#
+#     # Assemble the serialized data from the chunks
+#     serialized_data = b"".join(chunk["data"] for chunk in chunks)
+#
+#     # Deserialize the data to get the numpy data
+#     np_data = pickle.loads(serialized_data)
+#
+#     # Convert the numpy data back to an .npz file format in memory
+#     buffer = io.BytesIO()
+#     np.savez(buffer, **np_data)
+#     buffer.seek(0)
+#
+#     # Instead of sending the file, return the serialized data
+#     return jsonify({"serialized_data": serialized_data.decode("latin1")})
+#
+#
+# @app.route("/api/list_npz_files", methods=["GET"])
+# def list_npz_files():
+#     # Query distinct file names in the collection
+#     file_names = collection2.distinct("name")
+#     return jsonify(file_names)
+#
+# @app.route("/api/retrieve_npz_file/<file_name>", methods=["GET"])
+# def retrieve_npz_file(file_name):
+#     chunks = list(collection2.find({"name": file_name}).sort("chunk_number"))
+#     total_chunks = chunks[0]["total_chunks"]
+#     if len(chunks) != total_chunks:
+#         return jsonify({"error": "Some chunks are missing"}), 400
+#     serialized_data = b"".join(chunk["data"] for chunk in chunks)
+#     data = pickle.loads(serialized_data)
+#     return jsonify({"data": data.tolist()})
 
 
 if __name__ == "__main__":

@@ -130,6 +130,12 @@ def upload_large_npz_to_backend(npz_file_path):
         response = requests.post("http://flask_api:5003/api/upload_large_npz", files={"file": file})
     return response
 
+def retrieve_data(file_name):
+    response = requests.get(f"http://flask_api:5003/api/retrieve_data/{file_name}")
+    response.raise_for_status()  # This will raise an HTTPError if the response wasn't successful
+    data = pickle.loads(response.content)
+    return data
+
 ## Visua
 # def fetch_npz_names():
 #     # Implement the function to fetch available .npz file names from your database/API
@@ -149,3 +155,47 @@ def upload_large_npz_to_backend(npz_file_path):
 #         raise Exception(f"Error {response.status_code}: {response.text}")
 
 
+def update_image_embedding(image_name, dataset_name, embedding):
+    """
+    Updates the specified image's embedding in the database.
+
+    Args:
+    - image_name (str): Name of the image to update.
+    - dataset_name (str): Name of the dataset containing the image.
+    - embedding (np.array): The embedding vector.
+
+    Returns:
+    - Response from the API.
+    """
+    embedding_list = embedding.tolist()
+    data = {
+        "name": image_name,
+        "dataset_name": dataset_name,
+        "embedding": embedding_list
+    }
+    response = requests.post("http://flask_api:5003/api/update_image_embedding", json=data)
+    return response
+
+
+# def get_all_npz_files():
+#     response = requests.get("http://flask_api:5003/api/get_npz_files")
+#     print(response.content)
+#
+#     return response.json()
+#
+# def retrieve_npz_data(file_name):
+#     response = requests.get(f"http://flask_api:5003/api/download_large_npz?file_name={file_name}")
+#     if response.status_code != 200:
+#         raise ValueError("Error fetching data from the API.")
+#
+#     serialized_data = response.json()["serialized_data"].encode("latin1")
+#     np_data = pickle.loads(serialized_data)
+#     return np_data
+#
+# def get_all_npz_files():
+#     response = requests.get("http://flask_api:5003/api/list_npz_files")
+#     return response.json()
+#
+# def retrieve_npz_file(file_name):
+#     response = requests.get(f"http://flask_api:5003/api/retrieve_npz_file/{file_name}")
+#     return response.json()

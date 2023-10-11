@@ -33,13 +33,15 @@ class GenericImageDataset(Dataset):
         else:
             return len(self.image_data)
 
-    def __getitem__(self, index: int) -> Tuple[Any, Any]:
+    def __getitem__(self, index: int) -> Tuple[Any, Any, Any]:
         if self.mode == 'local':
             image_path = os.path.join(self.root_dir, self.image_files[index])
+            image_name = self.image_files[index]
             image = Image.open(image_path)
 
         else:
             image_info = self.image_data[index]
+            image_name = image_info['name']
             image_bytes = base64.b64decode(image_info['data'])
             image = Image.open(io.BytesIO(image_bytes))
 
@@ -47,6 +49,7 @@ class GenericImageDataset(Dataset):
             image = self.transform(image)
 
         return image, 0
+
 
 # Example usage for local mode:
 # dataset_local = GenericImageDataset(source='path_to_local_directory', mode='local', transform=transform)
