@@ -15,6 +15,7 @@ def test():
     # Let user select a dataset using Streamlit
     selected_dataset = st.selectbox("Select a dataset:", datasets)
 
+
     if st.button("Start new sample feature extraction"):
         parser = argparse.ArgumentParser()
         args = get_args()
@@ -47,6 +48,24 @@ def test():
         print(response.json())
         st.write("DONE")
         print("PUSHED TO DB !!!")
+
+    if st.button('TEST'):
+            args = get_args()
+
+            args.out_datasets = [selected_dataset, ]
+
+            exp = Exp_OWL(args)
+            print('Start extracting CIFAR and put it in cache')
+            exp.id_feature_extract()
+            print('>>>>>>>start ood detection on new-coming data : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(
+                args.out_datasets))
+            unknown_idx, bool_ood, scores_conf, pred_scores, pred_labels = exp.ood_detection(selected_dataset, K=50)
+            st.write(unknown_idx)
+            print('UNKNOWN', unknown_idx)
+
+
+
+
 
 
 

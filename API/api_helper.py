@@ -20,6 +20,7 @@ def upload_image_to_backend(encoded_image, filename, dataset_name):
 def push_results_to_db(results):
     for result in results:
         requests.post("http://flask_api:5003/api/update_results", json=result)
+        print(requests.post("http://flask_api:5003/api/update_results", json=result))
 
 
 def fetch_datasets():
@@ -204,3 +205,12 @@ def update_image_embedding(image_name, dataset_name, embedding):
 # def retrieve_npz_file(file_name):
 #     response = requests.get(f"http://flask_api:5003/api/retrieve_npz_file/{file_name}")
 #     return response.json()
+
+
+def push_embeddings_to_db(idx, dataset_name, embeddings):
+    data = {
+        "name": idx,
+        "dataset_name": dataset_name,
+        "embeddings": embeddings
+    }
+    requests.post("http://flask_api:5003/api/update_embeddings", json=data)

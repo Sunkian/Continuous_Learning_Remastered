@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore')
 
 np.random.seed(1)
 
-from API.api_helper import push_results_to_db
+from API.api_helper import push_results_to_db, push_embeddings_to_db
 class Exp_OWL(Exp_OWLbasic):
     def __init__(self, args):
         super(Exp_OWL, self).__init__(args)  ## init device
@@ -147,15 +147,18 @@ class Exp_OWL(Exp_OWLbasic):
             ood_feat_log = np.zeros((len(out_loader.dataset), sum(featdims)))
             ood_score_log = np.zeros((len(out_loader.dataset), self.num_classes))
 
-
             self.model.eval()
-            for batch_idx, (inputs, _) in enumerate(out_loader):
+            for batch_idx, (inputs, image_name) in enumerate(out_loader):
                 inputs = inputs.to(self.device)
                 start_ind = batch_idx * batch_size
                 end_ind = min((batch_idx + 1) * batch_size, len(out_loader.dataset))
 
                 score, feature_list = self.model.feature_list(inputs)
                 out = torch.cat([F.adaptive_avg_pool2d(layer_feat, 1).squeeze() for layer_feat in feature_list], dim=1)
+                embeddings_batch = out.data.cpu().numpy()
+                for idx in range(embeddings_batch.shape[0]):
+                    embeddings = embeddings_batch[idx].tolist()
+                    push_embeddings_to_db(image_name[idx], ood_dataset, embeddings)
 
                 ood_feat_log[start_ind:end_ind, :] = out.data.cpu().numpy()
                 ood_score_log[start_ind:end_ind] = score.data.cpu().numpy()

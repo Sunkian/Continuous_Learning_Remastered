@@ -11,6 +11,10 @@ import numpy as np
 from API.api_helper import retrieve_data, list_npz_files
 from sklearn.manifold import TSNE
 
+from model_jingwei.utils.args_loader import get_args
+import torch
+from model_jingwei.exp.exp_OWL import Exp_OWL
+
 CLASS_NAMES = ["airplane", "automobile", "bird", "cat", "deer",
                "dog", "frog", "horse", "ship", "truck"]
 
@@ -110,6 +114,20 @@ def visuuu():
     # Allow the user to select a file
     selected_id_file = st.selectbox('Select the ID data file:', available_files, index=0)
     selected_ood_file = st.selectbox('Select the OOD data file:', available_files, index=1)
+
+    if st.button('OOD DETECTION'):
+        args = get_args()
+
+        args.out_datasets = [selected_ood_file, ]
+
+        exp = Exp_OWL(args)
+        id_dataset = "CIFAR-10_train_resnet18-supcon_in_alllayers.npz"
+        print('>>>>>>>start ood detection on new-coming data : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(
+            args.out_datasets))
+        unknown_idx, bool_ood, scores_conf, pred_scores, pred_labels = exp.ood_detection(load_id_data(selected_id_file), load_ood_data(selected_ood_file),
+                                                                                         K=50)
+        print(pred_labels)
+        st.write(pred_labels)
 
     if st.button("Show Graph"):
         # Load and process the data
