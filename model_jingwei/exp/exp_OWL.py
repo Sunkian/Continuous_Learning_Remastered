@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore')
 
 np.random.seed(1)
 
-from API.api_helper import push_results_to_db, push_embeddings_to_db
+from API.api_helper import push_results_to_db, push_embeddings_to_db, push_scores_to_db
 class Exp_OWL(Exp_OWLbasic):
     def __init__(self, args):
         super(Exp_OWL, self).__init__(args)  ## init device
@@ -266,6 +266,16 @@ class Exp_OWL(Exp_OWLbasic):
         caches["ood_score_log"] = data['ood_score_log']  # shape: (N, C)
         pred_scores = np.max(caches["ood_score_log"], axis=1)  # (N)
         pred_labels = np.argmax(caches["ood_score_log"], axis=1)  # (N)
+
+        # for idx in range(len(pred_scores)):
+        #     push_scores_to_db(
+        #         idx=idx,
+        #         dataset_name=ood_dataset,
+        #         bool_ood=bool_ood[idx],
+        #         pred_scores=pred_scores[idx],
+        #         pred_labels=pred_labels[idx],
+        #         scores_confidence=scores_conf[idx]
+        #     )
 
         return unknown_idx, bool_ood, scores_conf, pred_scores, pred_labels
 

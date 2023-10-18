@@ -61,7 +61,7 @@ def test():
                 args.out_datasets))
             unknown_idx, bool_ood, scores_conf, pred_scores, pred_labels = exp.ood_detection(selected_dataset, K=50)
             st.write(unknown_idx)
-            print('UNKNOWN', unknown_idx)
+            print('Index for images recognized as ood: ', unknown_idx)
 
 
 

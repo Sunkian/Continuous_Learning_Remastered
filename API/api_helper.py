@@ -67,9 +67,6 @@ def fetch_image_data_and_embeddings(image_name, dataset_name):
     return None
 
 
-
-
-
 def fetch_all_image_data(dataset_name):
     """
     Fetch all information related to images in the given dataset.
@@ -101,7 +98,6 @@ def fetch_all_image_data(dataset_name):
     return all_image_data
 
 
-
 def update_selected_image_info(image_name, dataset_name, new_dataset_name, new_class_name):
     """
     Updates the specified image's dataset and class in the database.
@@ -125,11 +121,13 @@ def update_selected_image_info(image_name, dataset_name, new_dataset_name, new_c
     response = requests.post("http://flask_api:5003/api/update_selected_image_info", json=data)
     return response
 
+
 ## Push images<-> npz to db
 def upload_large_npz_to_backend(npz_file_path):
     with open(npz_file_path, "rb") as file:
         response = requests.post("http://flask_api:5003/api/upload_large_npz", files={"file": file})
     return response
+
 
 def retrieve_data(file_name):
     response = requests.get(f"http://flask_api:5003/api/retrieve_data/{file_name}")
@@ -137,10 +135,12 @@ def retrieve_data(file_name):
     data = pickle.loads(response.content)
     return data
 
+
 def list_npz_files():
     response = requests.get("http://flask_api:5003/api/list_npz_files")
     npz_files = response.json().get("npz_files", [])  # Extracts the list or returns an empty list if not found
     return npz_files
+
 
 ## Visua
 # def fetch_npz_names():
@@ -214,3 +214,15 @@ def push_embeddings_to_db(idx, dataset_name, embeddings):
         "embeddings": embeddings
     }
     requests.post("http://flask_api:5003/api/update_embeddings", json=data)
+
+
+def push_scores_to_db(idx, dataset_name, bool_ood, pred_scores, pred_labels, scores_confidence):
+    data = {
+        "name": idx,
+        "dataset_name": dataset_name,
+        "bool_ood": bool(bool_ood),
+        "pred_scores": pred_scores,
+        "pred_labels": pred_labels,
+        "scores_confidence": scores_confidence,
+    }
+    requests.post("http://flask_api:5003/api/update_scores", json=data)

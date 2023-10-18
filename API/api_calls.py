@@ -76,6 +76,53 @@ def update_results():
 
     return jsonify({"message": "Review updated in MongoDB!"})
 
+
+
+@app.route("/api/update_embeddings", methods=["POST"])
+def update_embeddings():
+    data = request.json
+    image_name = data["name"]
+    dataset_name = data["dataset_name"]
+    embeddings = data["embeddings"]
+
+    # Find the image in the database and update its embeddings
+    query = {"name": image_name, "dataset": dataset_name}
+    update_values = {
+        "$set": {
+            "embeddings": embeddings
+        }
+    }
+    collection.update_one(query, update_values)
+
+    return jsonify({"message": "Embeddings updated in MongoDB!"})
+
+
+
+
+@app.route("/api/update_scores", methods=["POST"])
+def update_scores():
+    data = request.json
+    image_name = data["name"]
+    dataset_name = data["dataset_name"]
+    bool_ood = data["bool_ood"]
+    pred_scores = data["pred_scores"]
+    pred_labels = data["pred_labels"]
+    scores_confidence = data["scores_confidence"]
+
+    # Find the image in the database and update its embeddings
+    query = {"name": image_name, "dataset": dataset_name}
+    update_values = {
+        "$set": {
+            "bool_ood": bool_ood,
+            "pred_scores": pred_scores,
+            "pred_labels": pred_labels,
+            "scores_confidence": scores_confidence,
+        }
+    }
+    collection.update_one(query, update_values)
+
+    return jsonify({"message": "Scores updated in MongoDB!"})
+
 # Define API endpoint to get list of datasets
 @app.route("/api/get_datasets", methods=["GET"])
 def get_datasets():
